@@ -1,126 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Humans Are Kind</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Humans Are Kind</title>
 
-    <style>
-        body{
-            font-family: Arial, sans-serif;
-            background:#f7f7f7;
-            text-align:center;
-            padding:40px;
-        }
+  <!-- 引入Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-        h1{
-            font-size:48px;
-        }
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      padding: 40px;
+      text-align: center;
+    }
 
-        textarea{
-            width:400px;
-            height:120px;
-            padding:10px;
-            font-size:16px;
-        }
+    h1 {
+      font-size: 48px;
+      color: #4CAF50;
+      margin-bottom: 20px;
+    }
 
-        button{
-            margin-top:10px;
-            padding:10px 20px;
-            font-size:16px;
-        }
+    p {
+      font-size: 18px;
+      color: #777;
+      margin-bottom: 30px;
+    }
 
-        .messages{
-            margin-top:40px;
-            max-width:600px;
-            margin-left:auto;
-            margin-right:auto;
-        }
+    textarea {
+      width: 80%;
+      height: 120px;
+      padding: 15px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+    }
 
-        .message{
-            background:white;
-            padding:15px;
-            margin:10px;
-            border-radius:8px;
-        }
-    </style>
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .messages {
+      margin-top: 40px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+
+    .message {
+      background-color: #fff;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .message p {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .message .name {
+      font-weight: bold;
+      color: #4CAF50;
+    }
+  </style>
 </head>
 
 <body>
 
-<h1>Humans Are Kind</h1>
+  <h1>Humans Are Kind</h1>
+  <p>Leave something kind for the world.</p>
 
-<p>Leave something kind for the world.</p>
+  <!-- 留言输入框 -->
+  <textarea id="messageInput" placeholder="Write something kind..."></textarea><br>
 
-<textarea id="messageInput" placeholder="Write something kind..."></textarea>
-<br>
-<button onclick="addMessage()">Leave a message</button>
+  <!-- 留言按钮 -->
+  <button onclick="addMessage()">Leave a message</button>
 
-<div class="messages" id="messages"></div>
+  <!-- 显示留言的区域 -->
+  <div class="messages" id="messages"></div>
 
-<script>
+  <script>
+    // 初始化 Supabase 客户端
+    const supabase = supabase.createClient(
+      '你的ProjectURL', // 替换为你的 Supabase 项目 URL
+      '你的anon key'    // 替换为你的 Supabase anon key
+    );
 
-function addMessage(){
+    // 添加留言到数据库并显示在页面上
+    async function addMessage() {
+      const content = document.getElementById("messageInput").value;
 
-    let text=document.getElementById("messageInput").value;
+      if (content.trim() === "") return; // 防止提交空内容
 
-    if(text==="") return;
+      // 保存留言到 Supabase 数据库
+      await supabase.from("messages").insert([{ content }]);
 
-    let message=document.createElement("div");
-    message.className="message";
-    message.innerText="💛 "+text;
+      // 清空输入框
+      document.getElementById("messageInput").value = "";
 
-    document.getElementById("messages").prepend(message);
+      // 更新留言显示
+      loadMessages();
+    }
 
-    document.getElementById("messageInput").value="";
-}
+    // 加载留言内容（从 Supabase 加载）
+    async function loadMessages() {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-</script>
+      if (error) {
+        console.error("Error loading messages:", error);
+        return;
+      }
+
+      const messagesContainer = document.getElementById("messages");
+      messagesContainer.innerHTML = ""; // 清空现有留言
+
+      // 显示留言
+      data.forEach((message) => {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message";
+        messageDiv.innerHTML = `<p class="name">💛 Anonymous:</p><p>${message.content}</p>`;
+        messagesContainer.appendChild(messageDiv);
+      });
+    }
+
+    // 页面加载时显示留言
+    loadMessages();
+  </script>
 
 </body>
 </html>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<script>
-const supabase = supabase.createClient(
-  "你的ProjectURL",
-  "你的anon key"
-)
-</script>
-<input id="name" placeholder="your name">
-<textarea id="message" placeholder="leave a message"></textarea>
-<button onclick="sendMessage()">Submit</button>
-
-<div id="messages"></div>
-
-<script>
-
-async function sendMessage() {
-
-  const name = document.getElementById("name").value
-  const content = document.getElementById("message").value
-
-  await supabase
-    .from("messages")
-    .insert([{ name, content }])
-
-  loadMessages()
-}
-
-async function loadMessages(){
-
-  const { data } = await supabase
-    .from("messages")
-    .select("*")
-    .order("created_at", { ascending:false })
-
-  const box = document.getElementById("messages")
-  box.innerHTML=""
-
-  data.forEach(m=>{
-    box.innerHTML += `<p><b>${m.name}</b>: ${m.content}</p>`
-  })
-
-}
-
-loadMessages()
-
-</script>
