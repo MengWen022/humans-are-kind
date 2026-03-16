@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Humans Are Kind</title>
+
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            background:#f7f7f7;
+            text-align:center;
+            padding:40px;
+        }
+
+        h1{
+            font-size:48px;
+        }
+
+        textarea{
+            width:400px;
+            height:120px;
+            padding:10px;
+            font-size:16px;
+        }
+
+        button{
+            margin-top:10px;
+            padding:10px 20px;
+            font-size:16px;
+        }
+
+        .messages{
+            margin-top:40px;
+            max-width:600px;
+            margin-left:auto;
+            margin-right:auto;
+        }
+
+        .message{
+            background:white;
+            padding:15px;
+            margin:10px;
+            border-radius:8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Humans Are Kind</h1>
+
+<p>Leave something kind for the world.</p>
+
+<textarea id="messageInput" placeholder="Write something kind..."></textarea>
+<br>
+<button onclick="addMessage()">Leave a message</button>
+
+<div class="messages" id="messages"></div>
+
+<script>
+
+function addMessage(){
+
+    let text=document.getElementById("messageInput").value;
+
+    if(text==="") return;
+
+    let message=document.createElement("div");
+    message.className="message";
+    message.innerText="💛 "+text;
+
+    document.getElementById("messages").prepend(message);
+
+    document.getElementById("messageInput").value="";
+}
+
+</script>
+
+</body>
+</html>
