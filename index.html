@@ -107,11 +107,20 @@
     // 添加留言到数据库并显示在页面上
     async function addMessage() {
       const content = document.getElementById("messageInput").value;
-
+      
       if (content.trim() === "") return; // 防止提交空内容
 
+      console.log("Adding message:", content);  // 调试日志
+
       // 保存留言到 Supabase 数据库
-      await supabase.from("messages").insert([{ content }]);
+      const { data, error } = await supabase.from("messages").insert([{ content }]);
+
+      if (error) {
+        console.error("Error inserting message:", error);
+        return;
+      }
+
+      console.log("Message added successfully:", data);
 
       // 清空输入框
       document.getElementById("messageInput").value = "";
@@ -132,6 +141,8 @@
         return;
       }
 
+      console.log("Loaded messages:", data);  // 调试日志，查看是否正确加载数据
+
       const messagesContainer = document.getElementById("messages");
       messagesContainer.innerHTML = ""; // 清空现有留言
 
@@ -145,7 +156,9 @@
     }
 
     // 页面加载时显示留言
-    loadMessages();
+    window.onload = function() {
+      loadMessages();  // 页面加载时加载留言
+    };
   </script>
 
 </body>
