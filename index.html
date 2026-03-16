@@ -77,3 +77,50 @@ function addMessage(){
 
 </body>
 </html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+const supabase = supabase.createClient(
+  "你的ProjectURL",
+  "你的anon key"
+)
+</script>
+<input id="name" placeholder="your name">
+<textarea id="message" placeholder="leave a message"></textarea>
+<button onclick="sendMessage()">Submit</button>
+
+<div id="messages"></div>
+
+<script>
+
+async function sendMessage() {
+
+  const name = document.getElementById("name").value
+  const content = document.getElementById("message").value
+
+  await supabase
+    .from("messages")
+    .insert([{ name, content }])
+
+  loadMessages()
+}
+
+async function loadMessages(){
+
+  const { data } = await supabase
+    .from("messages")
+    .select("*")
+    .order("created_at", { ascending:false })
+
+  const box = document.getElementById("messages")
+  box.innerHTML=""
+
+  data.forEach(m=>{
+    box.innerHTML += `<p><b>${m.name}</b>: ${m.content}</p>`
+  })
+
+}
+
+loadMessages()
+
+</script>
