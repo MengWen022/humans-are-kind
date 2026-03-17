@@ -92,74 +92,29 @@
   <textarea id="messageInput" placeholder="Write something kind..."></textarea><br>
 
   <!-- 留言按钮 -->
-  <button onclick="addMessage()">Leave a message</button>
-
+  <button id="submitBtn">Leave a message</button>
   <!-- 显示留言的区域 -->
   <div class="messages" id="messages"></div>
 
-  <script>
-    // 初始化 Supabase 客户端
-    const supabase = supabase.createClient(
-      'https://hqzdwkbbyskmzbfcdogx.supabase.co', // 替换为你的 Supabase 项目 URL
-      'sb_publishable_UKzaNa3QZWzVpNeTGyX6zw_UGXsaKbw'    // 替换为你的 Supabase anon key
-    );
+<script>
 
-    // 添加留言到数据库并显示在页面上
-    async function addMessage() {
-      const content = document.getElementById("messageInput").value;
-      
-      if (content.trim() === "") return; // 防止提交空内容
+document.getElementById("submitBtn").addEventListener("click", function(){
 
-      console.log("Adding message:", content);  // 调试日志
+    let text = document.getElementById("messageInput").value;
 
-      // 保存留言到 Supabase 数据库
-      const { data, error } = await supabase.from("messages").insert([{ content }]);
+    if(text === "") return;
 
-      if (error) {
-        console.error("Error inserting message:", error);
-        return;
-      }
+    let message = document.createElement("div");
+    message.className = "message";
+    message.innerText = "💛 " + text;
 
-      console.log("Message added successfully:", data);
+    document.getElementById("messages").prepend(message);
 
-      // 清空输入框
-      document.getElementById("messageInput").value = "";
+    document.getElementById("messageInput").value = "";
 
-      // 更新留言显示
-      loadMessages();
-    }
+});
 
-    // 加载留言内容（从 Supabase 加载）
-    async function loadMessages() {
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error loading messages:", error);
-        return;
-      }
-
-      console.log("Loaded messages:", data);  // 调试日志，查看是否正确加载数据
-
-      const messagesContainer = document.getElementById("messages");
-      messagesContainer.innerHTML = ""; // 清空现有留言
-
-      // 显示留言
-      data.forEach((message) => {
-        const messageDiv = document.createElement("div");
-        messageDiv.className = "message";
-        messageDiv.innerHTML = `<p class="name">💛 Anonymous:</p><p>${message.content}</p>`;
-        messagesContainer.appendChild(messageDiv);
-      });
-    }
-
-    // 页面加载时显示留言
-    window.onload = function() {
-      loadMessages();  // 页面加载时加载留言
-    };
-  </script>
+</script>
 
 </body>
 </html>
