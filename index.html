@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Humans Are Kind</title>
 
-
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -52,31 +51,28 @@
       background-color: #45a049;
     }
 
-    .messages {
+    #viewer {
       margin-top: 40px;
       max-width: 800px;
       margin-left: auto;
       margin-right: auto;
-      text-align: left;
-    }
-
-    .message {
+      text-align: center;
       background-color: #fff;
-      padding: 15px;
-      margin: 10px 0;
+      padding: 20px;
       border-radius: 8px;
       border: 1px solid #ddd;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
-    .message p {
-      margin: 0;
-      font-size: 16px;
+    #messageText {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 10px;
     }
 
-    .message .name {
-      font-weight: bold;
-      color: #4CAF50;
+    #messageTime {
+      font-size: 14px;
+      color: #999;
     }
   </style>
 </head>
@@ -91,9 +87,14 @@
 
   <!-- 留言按钮 -->
   <button id="submitBtn">Leave a message</button>
-  <!-- 显示留言的区域 -->
-  <div class="messages" id="messages"></div>
 
+  <!-- 显示留言的区域 -->
+  <div id="viewer">
+    <div id="messageText">Loading...</div>
+    <div id="messageTime"></div>
+  </div>
+
+  <button id="nextBtn">Next</button>
 
 <script type="module">
 
@@ -103,45 +104,65 @@ const SUPABASE_URL = "https://hqzdwkbbyskmzbfcdogx.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxemR3a2JieXNrbXpiZmNkb2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTU5NjMsImV4cCI6MjA4OTIzMTk2M30.VmmXa-OK4dtm5RJEdpflMxll7GkuBPvSpPAmCWld6R8";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-  
+
+// 【修改点1】保存所有留言的数组
+let messages = [];
+let currentIndex = 0;
+
 // 页面加载时读取留言
 async function loadMessages() {
     let { data, error } = await supabase
         .from('messages')
         .select('*')
-        .order('id', { ascending: false });
+        .order('id', { ascending: true }); // 【修改点2】按升序获取，便于循环显示
 
-    if(data){
-        data.forEach(msg => {
-            addMessageToPage(msg.content);
-        });
+    if (data && data.length > 0) {
+        messages = data; // 【修改点3】把数据存入全局数组
+
+        // 【修改点4】随机选择第一条显示
+        currentIndex = Math.floor(Math.random() * messages.length);
+        displayMessage(messages[currentIndex]);
+    } else {
+        document.getElementById("messageText").innerText = "No messages yet!";
     }
 }
 
-// 添加留言到页面
-function addMessageToPage(text){
-    let message = document.createElement("div");
-    message.className = "message";
-    message.innerText = "💛 " + text;
-    document.getElementById("messages").appendChild(message);
+// 【修改点5】显示留言函数
+function displayMessage(msg){
+    document.getElementById("messageText").innerText = "💛 " + msg.content;
+    if(msg.created_at){ // 如果数据库有时间字段
+        document.getElementById("messageTime").innerText = new Date(msg.created_at).toLocaleString();
+    } else {
+        document.getElementById("messageTime").innerText = "";
+    }
 }
+
+// 点击 Next 按钮显示下一条留言
+document.getElementById("nextBtn").addEventListener("click", function(){
+    if(messages.length === 0) return;
+
+    currentIndex = (currentIndex + 1) % messages.length; // 【修改点6】循环显示
+    displayMessage(messages[currentIndex]);
+});
 
 // 点击按钮提交留言
 document.getElementById("submitBtn").addEventListener("click", async function(){
 
-    let text = document.getElementById("messageInput").value;
+    let text = document.getElementById("messageInput").value.trim();
 
     if(text === "") return;
 
     // 存入数据库
-    await supabase.from('messages').insert([
+    const { data, error } = await supabase.from('messages').insert([
         { content: text }
-    ]);
+    ]).select(); // 【修改点7】加上 select() 获取插入后的记录
 
-    // 显示在页面
-    addMessageToPage(text);
-
-    document.getElementById("messageInput").value = "";
+    if(data && data[0]){
+        messages.push(data[0]); // 【修改点8】把新留言加入数组
+        currentIndex = messages.length - 1; // 【修改点9】显示最新留言
+        displayMessage(messages[currentIndex]);
+        document.getElementById("messageInput").value = "";
+    }
 });
 
 // 页面加载时执行
