@@ -98,21 +98,53 @@
 
 <script>
 
-document.getElementById("submitBtn").addEventListener("click", function(){
+const SUPABASE_URL = "https://hqzdwkbbyskmzbfcdogx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_UKzaNa3QZWzVpNeTGyX6zw_UGXsaKbw";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 页面加载时读取留言
+async function loadMessages() {
+    let { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .order('id', { ascending: false });
+
+    if(data){
+        data.forEach(msg => {
+            addMessageToPage(msg.content);
+        });
+    }
+}
+
+// 添加留言到页面
+function addMessageToPage(text){
+    let message = document.createElement("div");
+    message.className = "message";
+    message.innerText = "💛 " + text;
+    document.getElementById("messages").appendChild(message);
+}
+
+// 点击按钮提交留言
+document.getElementById("submitBtn").addEventListener("click", async function(){
 
     let text = document.getElementById("messageInput").value;
 
     if(text === "") return;
 
-    let message = document.createElement("div");
-    message.className = "message";
-    message.innerText = "💛 " + text;
+    // 存入数据库
+    await supabase.from('messages').insert([
+        { content: text }
+    ]);
 
-    document.getElementById("messages").prepend(message);
+    // 显示在页面
+    addMessageToPage(text);
 
     document.getElementById("messageInput").value = "";
-
 });
+
+// 页面加载时执行
+loadMessages();
 
 </script>
 
