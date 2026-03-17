@@ -12,26 +12,17 @@
       padding: 40px;
       text-align: center;
     }
-/* 背景推荐词样式 */
-.hero {
-  height: 100vh; /* 占满整个屏幕高度 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  background: url('你的背景图.jpg') no-repeat center center/cover; /* 可换为纯色 */
-  position: relative;
-  color: white;
-}
 
-.hero-text {
-  background-color: rgba(0, 0, 0, 0.5); /* 半透明背景，提高可读性 */
-  padding: 30px;
-  border-radius: 15px;
-  font-size: 1.5rem;
-  line-height: 1.6;
-  max-width: 800px;
-}
+    /* 背景推荐词样式 */
+
+  hero-text {
+    background-color: rgba(0, 0, 0, 0.5); /* 半透明背景，提高可读性 */
+    padding: 30px;
+    border-radius: 15px;
+    font-size: 1.5rem;
+    line-height: 1.6;
+    max-width: 800px;
+  }
     
     h1 {
       font-size: 48px;
@@ -98,18 +89,14 @@
 </head>
 
 <body>
-<!-- 背景推荐词 -->
-<div class="hero">
-  <div class="hero-text">
-    停下来吧，给自己一个呼吸的空间。<br>
-    <strong>Humans Are Kind</strong> 用一句句温暖的话提醒你：有人在意你，你值得被善待。<br>
-    哪怕只是片刻的停留，也能让心重新获得前行的力量。
-  </div>
-</div>
   
   <h1>Humans Are Kind</h1>
   <p>Leave something kind for the world.</p>
-
+<!-- 推荐词 -->
+  <p class="hero-text">
+    停下来，给自己一个呼吸的空间。用一句句温暖的话提醒你：有人在意你，你值得被善待。<br>
+    哪怕只是片刻的停留，也能让心重新获得前行的力量。
+  </p>
   <!-- 留言输入框 -->
   <textarea id="messageInput" placeholder="Write something kind..."></textarea><br>
 
