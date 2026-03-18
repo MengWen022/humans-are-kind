@@ -13,17 +13,16 @@
       text-align: center;
     }
 
-    /* 背景推荐词样式 */
+    /* ✅ 修复这里 */
+    .hero-text {
+      background-color: rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 700px;
+      margin: 0 auto 30px;
+      line-height: 1.6;
+    }
 
-  hero-text {
-    background-color: rgba(0, 0, 0, 0.5); /* 半透明背景，提高可读性 */
-    padding: 30px;
-    border-radius: 15px;
-    font-size: 1.5rem;
-    line-height: 1.6;
-    max-width: 800px;
-  }
-    
     h1 {
       font-size: 48px;
       color: #4CAF50;
@@ -43,144 +42,157 @@
       font-size: 18px;
       border-radius: 8px;
       border: 1px solid #ddd;
-      box-sizing: border-box;
       margin-bottom: 20px;
     }
 
     button {
-      padding: 12px 24px;
-      font-size: 18px;
+      padding: 10px 20px;
+      font-size: 16px;
       background-color: #4CAF50;
       color: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: #45a049;
+      margin: 5px;
     }
 
     #viewer {
       margin-top: 40px;
-      max-width: 800px;
+      max-width: 600px;
       margin-left: auto;
       margin-right: auto;
-      text-align: center;
       background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     #messageText {
-      font-size: 18px;
-      color: #333;
-      margin-bottom: 10px;
+      font-size: 20px;
+      margin-bottom: 15px;
     }
 
     #messageTime {
-      font-size: 14px;
+      font-size: 12px;
       color: #999;
+      margin-bottom: 15px;
+    }
+
+    #likeBtn {
+      background-color: #eee;
+      color: #333;
+    }
+
+    #likeBtn:hover {
+      background-color: #ddd;
     }
   </style>
 </head>
 
 <body>
-  
-  <h1>Humans Are Kind</h1>
-  <p>Leave something kind for the world.</p>
-<!-- 推荐词 -->
-  <p class="hero-text">
-    停下来，给自己一个呼吸的空间。用一句句温暖的话提醒你：有人在意你，你值得被善待。<br>
-    哪怕只是片刻的停留，也能让心重新获得前行的力量。
-  </p>
-  <!-- 留言输入框 -->
-  <textarea id="messageInput" placeholder="Write something kind..."></textarea><br>
 
-  <!-- 留言按钮 -->
-  <button id="submitBtn">Leave a message</button>
+<h1>Humans Are Kind</h1>
+<p>Leave something kind for the world.</p>
 
-  <!-- 显示留言的区域 -->
-  <div id="viewer">
-    <div id="messageText">Loading...</div>
-    <div id="messageTime"></div>
-  </div>
+<p class="hero-text">
+  停下来，给自己一个呼吸的空间。用一句句温暖的话提醒你：有人在意你，你值得被善待。<br>
+  哪怕只是片刻的停留，也能让心重新获得前行的力量。
+</p>
 
-  <button id="nextBtn">Next</button>
+<textarea id="messageInput" placeholder="Write something kind..."></textarea><br>
+<button id="submitBtn">Leave a message</button>
+
+<div id="viewer">
+  <div id="messageText">Loading...</div>
+  <div id="messageTime"></div>
+  <button id="likeBtn">👍 0</button>
+</div>
+
+<button id="nextBtn">Next</button>
 
 <script type="module">
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const SUPABASE_URL = "https://hqzdwkbbyskmzbfcdogx.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxemR3a2JieXNrbXpiZmNkb2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTU5NjMsImV4cCI6MjA4OTIzMTk2M30.VmmXa-OK4dtm5RJEdpflMxll7GkuBPvSpPAmCWld6R8";
+const supabase = createClient(
+  "https://hqzdwkbbyskmzbfcdogx.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxemR3a2JieXNrbXpiZmNkb2d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTU5NjMsImV4cCI6MjA4OTIzMTk2M30.VmmXa-OK4dtm5RJEdpflMxll7GkuBPvSpPAmCWld6R8"
+);
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// 【修改点1】保存所有留言的数组
 let messages = [];
 let currentIndex = 0;
 
-// 页面加载时读取留言
+// 加载留言
 async function loadMessages() {
-    let { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .order('id', { ascending: true }); // 【修改点2】按升序获取，便于循环显示
+  let { data } = await supabase
+    .from('messages')
+    .select('*')
+    .order('id', { ascending: true });
 
-    if (data && data.length > 0) {
-        messages = data; // 【修改点3】把数据存入全局数组
-
-        // 【修改点4】随机选择第一条显示
-        currentIndex = Math.floor(Math.random() * messages.length);
-        displayMessage(messages[currentIndex]);
-    } else {
-        document.getElementById("messageText").innerText = "No messages yet!";
-    }
-}
-
-// 【修改点5】显示留言函数
-function displayMessage(msg){
-    document.getElementById("messageText").innerText = "💛 " + msg.content;
-    if(msg.created_at){ // 如果数据库有时间字段
-        document.getElementById("messageTime").innerText = new Date(msg.created_at).toLocaleString();
-    } else {
-        document.getElementById("messageTime").innerText = "";
-    }
-}
-
-// 点击 Next 按钮显示下一条留言
-document.getElementById("nextBtn").addEventListener("click", function(){
-    if(messages.length === 0) return;
-
-    currentIndex = (currentIndex + 1) % messages.length; // 【修改点6】循环显示
+  if (data && data.length > 0) {
+    messages = data;
+    currentIndex = Math.floor(Math.random() * messages.length);
     displayMessage(messages[currentIndex]);
+  } else {
+    document.getElementById("messageText").innerText = "No messages yet!";
+  }
+}
+
+// 显示留言
+function displayMessage(msg){
+  document.getElementById("messageText").innerText = "💛 " + msg.content;
+
+  document.getElementById("messageTime").innerText =
+    msg.created_at ? new Date(msg.created_at).toLocaleString() : "";
+
+  document.getElementById("likeBtn").innerText =
+    "👍 " + (msg.likes || 0);
+}
+
+// 👍 点赞
+document.getElementById("likeBtn").addEventListener("click", async function(){
+
+  let msg = messages[currentIndex];
+
+  let newLikes = (msg.likes || 0) + 1;
+
+  const { error } = await supabase
+    .from('messages')
+    .update({ likes: newLikes })
+    .eq('id', msg.id);
+
+  if (!error) {
+    msg.likes = newLikes;
+    displayMessage(msg);
+  }
 });
 
-// 点击按钮提交留言
+// 下一条
+document.getElementById("nextBtn").addEventListener("click", function(){
+  if(messages.length === 0) return;
+
+  currentIndex = (currentIndex + 1) % messages.length;
+  displayMessage(messages[currentIndex]);
+});
+
+// 提交留言
 document.getElementById("submitBtn").addEventListener("click", async function(){
 
-    let text = document.getElementById("messageInput").value.trim();
+  let text = document.getElementById("messageInput").value.trim();
+  if(text === "") return;
 
-    if(text === "") return;
+  const { data } = await supabase.from('messages').insert([
+    { content: text, likes: 0 }
+  ]).select();
 
-    // 存入数据库
-    const { data, error } = await supabase.from('messages').insert([
-        { content: text }
-    ]).select(); // 【修改点7】加上 select() 获取插入后的记录
-
-    if(data && data[0]){
-        messages.push(data[0]); // 【修改点8】把新留言加入数组
-        currentIndex = messages.length - 1; // 【修改点9】显示最新留言
-        displayMessage(messages[currentIndex]);
-        document.getElementById("messageInput").value = "";
-    }
+  if(data && data[0]){
+    messages.push(data[0]);
+    currentIndex = messages.length - 1;
+    displayMessage(messages[currentIndex]);
+    document.getElementById("messageInput").value = "";
+  }
 });
 
-// 页面加载时执行
 loadMessages();
 
 </script>
