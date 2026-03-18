@@ -146,10 +146,10 @@ function displayMessage(msg){
     msg.created_at ? new Date(msg.created_at).toLocaleString() : "";
 
   document.getElementById("likeBtn").innerText =
-    "👍 " + (msg.likes || 0);
+    "❤️ " + (msg.likes || 0);
 }
 
-// 👍 点赞
+// 点赞
 document.getElementById("likeBtn").addEventListener("click", async function(){
 
   let msg = messages[currentIndex];
